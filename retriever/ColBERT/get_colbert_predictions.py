@@ -11,7 +11,7 @@ import pdb
 def main(args):
     exp_name = 'colbert'
 
-    with Run().context(RunConfig(nranks=1, experiment=exp_name)):
+    with Run().context(RunConfig(nranks=args.nranks, experiment=exp_name)):
         config = ColBERTConfig(
             index_path = os.path.join(args.index_dir, 'colbert', args.corpus),
             nbits=2,
@@ -27,7 +27,7 @@ def main(args):
         print('loading query from', query_file)
         queries = Queries(query_file)
         print('START SEARCHING')
-        ranking = searcher.search_all(queries, k=100)
+        ranking = searcher.search_all(queries, k=args.k)
 
         pred_dir = os.path.join(args.prediction_dir, exp_name)
         os.makedirs(pred_dir, exist_ok = True)
@@ -61,5 +61,7 @@ if __name__=='__main__':
     parser.add_argument("--data_dir", help='where is the folder you stored the dataset jsonl in?')
     parser.add_argument("--dataset", help='what is the name of the dataset?')
     parser.add_argument("--index_dir", help='what is the name of the colbert index dir?')
+    parser.add_argument("--nranks", type=int, default=1, help='number of child jobs')
+    parser.add_argument("--k", type=int, default=100, help='number of retrieval documents')
     args = parser.parse_args()
     main(args)
